@@ -1,0 +1,103 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import os
+import webbrowser
+import wikipedia
+import json  # For configuration
+import subprocess # For launching applications (more robust)
+
+# Configuration (load from a JSON file)
+try:
+    with open("config.json", "r") as f:
+        config = json.load(f)
+except FileNotFoundError:
+    config = {}  # Default configuration if file doesn't exist
+
+# Initialize... (same as before)
+r = sr.Recognizer()
+engine = pyttsx3.init()
+
+# ... (speak, listen, greet functions - same as before)
+
+def process_command(command):
+    if "time" in command:
+        # ... (same as before)
+    elif "date" in command:
+        # ... (same as before)
+    elif "open website" in command:  # More general website opening
+        website = command.replace("open website", "").strip()
+        if not website.startswith("http"): #Add https if not present
+            website = "https://"+website
+        webbrowser.open(website)
+        speak(f"Opening {website}...")
+
+    elif "open application" in command: #More robust application launching
+        app_name = command.replace("open application", "").strip()
+        try:
+            # Try to launch using subprocess (more reliable)
+            subprocess.Popen([app_name])  # Assumes the app is in the system's PATH
+            speak(f"Opening {app_name}...")
+        except FileNotFoundError:
+            try:
+                # If that fails, try opening using the OS (less reliable)
+                os.startfile(app_name) #Windows only
+                speak(f"Opening {app_name}...")
+            except OSError:
+                speak(f"I couldn't find an application named {app_name}.")
+        except Exception as e:
+            speak(f"An error occurred while opening the application: {e}")
+
+    elif "wikipedia" in command:
+        # ... (same as before)
+
+    elif "play music" in command:
+        # ... (same as before, still a placeholder)
+
+    elif "exit" in command or "quit" in command:
+        # ... (same as before)
+
+    else:
+        speak("I don't understand that command. Please try again.")
+
+if _name_ == "_main_":
+    greet()
+    while True:
+        command = listen()
+        if command:
+            process_command(command)# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
